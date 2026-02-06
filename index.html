@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cardápio Digital Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Poppins:wght@400;700&family=Roboto:wght@400;700&family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --p-color: #059669; --bg-color: #f3f4f6; --card-bg: #ffffff; }
+        body { background-color: var(--bg-color); transition: 0.3s; }
+        .btn-primary { background-color: var(--p-color); }
+        .selected-card { border: 4px solid var(--p-color) !important; transform: scale(1.02); }
+        .hidden { display: none; }
+    </style>
+</head>
+<body class="font-['Inter']">
+
+    <main id="app-menu" class="max-w-md mx-auto min-h-screen pb-24 shadow-lg bg-[var(--bg-color)]">
+        <header id="header-banner" class="h-52 bg-cover bg-center mb-4 shadow-inner" style="background-image: url('https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=600&q=80')"></header>
+        
+        <div class="px-6">
+            <h1 id="res-name-display" class="text-3xl font-black mb-1">Trem Bão</h1>
+            <a id="insta-link" href="https://www.instagram.com/trembaocozinhabrasileira/" target="_blank" class="text-pink-600 font-bold flex items-center gap-2 mb-6">
+                <span>📸 Siga no Instagram</span>
+            </a>
+
+            <div class="mb-8 bg-white p-4 rounded-2xl shadow-sm">
+                <label class="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wide">Seu Nome</label>
+                <input type="text" id="client-name" placeholder="Ex: João Silva" class="w-full p-4 rounded-xl border-2 border-gray-100 focus:border-[var(--p-color)] outline-none transition-all">
+            </div>
+
+            <h2 class="text-xl font-bold mb-4 flex items-center gap-2">🍽️ Escolha seu Prato</h2>
+            <div id="pratos-container" class="grid gap-4"></div>
+
+            <div id="acc-section" class="mt-8 hidden animate-fade-in">
+                <h2 class="text-xl font-bold mb-4">🥗 Acompanhamentos</h2>
+                <div id="acc-container" class="grid gap-3"></div>
+            </div>
+        </div>
+
+        <button id="btn-enviar" disabled class="fixed bottom-6 left-6 right-6 btn-primary text-white py-5 rounded-2xl font-black text-xl shadow-2xl uppercase tracking-widest transition-all opacity-50">
+            Enviar Pedido
+        </button>
+    </main>
+
+    <section id="admin-panel" class="hidden fixed inset-0 bg-white z-[200] overflow-y-auto p-6 font-['Inter']">
+        <div class="max-w-md mx-auto">
+            <div class="flex justify-between items-center mb-8">
+                <h2 class="text-2xl font-bold">⚙️ Painel Admin</h2>
+                <button onclick="toggleAdmin()" class="bg-gray-100 p-2 rounded-lg text-gray-500">Fechar</button>
+            </div>
+
+            <div class="space-y-6">
+                <div class="bg-gray-50 p-4 rounded-xl">
+                    <p class="font-bold mb-3">🎨 Identidade Visual</p>
+                    <label class="text-xs block mb-1">Cor Primária</label>
+                    <input type="color" id="adm-color-p" class="w-full h-10 rounded mb-3">
+                    <label class="text-xs block mb-1">Fonte</label>
+                    <select id="adm-font" class="w-full p-3 rounded border">
+                        <option value="'Inter'">Inter</option>
+                        <option value="'Poppins'">Poppins</option>
+                        <option value="'Roboto'">Roboto</option>
+                        <option value="'Montserrat'">Montserrat</option>
+                    </select>
+                </div>
+
+                <div class="bg-gray-50 p-4 rounded-xl">
+                    <p class="font-bold mb-3">📝 Conteúdo</p>
+                    <input type="text" id="adm-name" placeholder="Nome do Restaurante" class="w-full p-3 rounded border mb-3">
+                    <input type="text" id="adm-banner" placeholder="URL da Imagem Banner" class="w-full p-3 rounded border">
+                </div>
+
+                <button onclick="saveAdmin()" class="w-full bg-black text-white py-4 rounded-xl font-bold">SALVAR E ATUALIZAR</button>
+                <button onclick="resetSystem()" class="w-full text-red-500 text-sm underline">Limpar bloqueio de envio (Reset)</button>
+            </div>
+        </div>
+    </section>
+
+    <div onclick="checkAdmin()" class="fixed top-0 right-0 w-12 h-12 cursor-pointer z-[50]"></div>
+
+    <script>
+        const WEBHOOK = "https://script.google.com/macros/s/AKfycbzaOMq4-v2vqsjS1USBrupBqMoGQlRLGUiPdGaC-OM1XolaQ1YosBF563Ylz26f6QSSiQ/exec";
+
+        let state = JSON.parse(localStorage.getItem('db_menu')) || {
+            name: "Trem Bão Cozinha Brasileira",
+            color: "#059669",
+            font: "'Inter'",
+            banner: "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=600&q=80",
+            pratos: [
+                { id: 1, n: "Feijoada", img: "https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=200", acc: ["Arroz", "Couve", "Farofa", "Laranja", "Torresmo"] },
+                { id: 2, n: "Frango com Quiabo", img: "https://images.unsplash.com/photo-1604908176997-125f25cc6f3d?w=200", acc: ["Angu", "Arroz", "Feijão", "Salada", "Farofa"] },
+                { id: 3, n: "Moqueca", img: "https://images.unsplash.com/photo-1467003909585-2f8a72700288?w=200", acc: ["Pirão", "Arroz", "Farofa", "Molho", "Salada"] },
+                { id: 4, n: "Picanha", img: "https://images.unsplash.com/photo-1544025162-d76694265947?w=200", acc: ["Batata", "Arroz", "Vinagrete", "Farofa", "Feijão"] }
+            ]
+        };
+
+        let selPrato = null;
+        let selAccs = [];
+
+        function init() {
+            document.documentElement.style.setProperty('--p-color', state.color);
+            document.body.style.fontFamily = state.font;
+            document.getElementById('res-name-display').innerText = state.name;
+            document.getElementById('header-banner').style.backgroundImage = `url(${state.banner})`;
+            renderPratos();
+            checkValidation();
+        }
+
+        function renderPratos() {
+            const container = document.getElementById('pratos-container');
+            container.innerHTML = state.pratos.map(p => `
+                <div onclick="selectPrato(${p.id})" id="p-${p.id}" class="bg-white p-3 rounded-2xl shadow-sm flex items-center gap-4 border-2 border-transparent transition-all cursor-pointer">
+                    <img src="${p.img}" class="w-20 h-20 rounded-xl object-cover">
+                    <span class="font-bold text-lg">${p.n}</span>
+                </div>
+            `).join('');
+        }
+
+        function selectPrato(id) {
+            if (localStorage.getItem('sent')) return;
+            selPrato = state.pratos.find(p => p.id === id);
+            selAccs = [];
+            
+            document.querySelectorAll('[id^="p-"]').forEach(el => el.classList.add('hidden'));
+            const el = document.getElementById(`p-${id}`);
+            el.classList.remove('hidden');
+            el.classList.add('selected-card');
+
+            document.getElementById('acc-section').classList.remove('hidden');
+            const accCont = document.getElementById('acc-container');
+            accCont.innerHTML = selPrato.acc.map(a => `
+                <label class="flex items-center p-4 bg-white rounded-xl shadow-sm border border-gray-50">
+                    <input type="checkbox" class="w-6 h-6 mr-3" onchange="toggleAcc('${a}')"> ${a}
+                </label>
+            `).join('');
+            checkValidation();
+        }
+
+        function toggleAcc(a) {
+            const i = selAccs.indexOf(a);
+            if (i > -1) selAccs.splice(i, 1); else selAccs.push(a);
+            checkValidation();
+        }
+
+        function checkValidation() {
+            const nome = document.getElementById('client-name').value.trim();
+            const btn = document.getElementById('btn-enviar');
+            const jaEnviou = localStorage.getItem('sent');
+
+            if (nome && selPrato && selAccs.length > 0 && !jaEnviou) {
+                btn.disabled = false;
+                btn.style.opacity = "1";
+            } else {
+                btn.disabled = true;
+                btn.style.opacity = "0.5";
+            }
+        }
+
+        document.getElementById('btn-enviar').addEventListener('click', async () => {
+            const btn = document.getElementById('btn-enviar');
+            btn.innerText = "ENVIANDO...";
+            btn.disabled = true;
+
+            const payload = {
+                nome: document.getElementById('client-name').value,
+                prato: selPrato.n,
+                acompanhamentos: selAccs.join(', '),
+                timestamp: new Date().toLocaleString('pt-BR')
+            };
+
+            try {
+                await fetch(WEBHOOK, { method: 'POST', mode: 'no-cors', body: JSON.stringify(payload) });
+                localStorage.setItem('sent', 'true');
+                alert("Pedido enviado com sucesso!");
+                location.reload();
+            } catch (e) {
+                alert("Erro ao conectar com a planilha.");
+                btn.innerText = "Enviar Pedido";
+                btn.disabled = false;
+            }
+        });
+
+        // ADMIN LOGIC
+        function checkAdmin() {
+            if (prompt("Senha Admin:") === "123") {
+                document.getElementById('admin-panel').classList.remove('hidden');
+                document.getElementById('adm-name').value = state.name;
+                document.getElementById('adm-color-p').value = state.color;
+                document.getElementById('adm-banner').value = state.banner;
+            }
+        }
+
+        function saveAdmin() {
+            state.name = document.getElementById('adm-name').value;
+            state.color = document.getElementById('adm-color-p').value;
+            state.font = document.getElementById('adm-font').value;
+            state.banner = document.getElementById('adm-banner').value;
+            localStorage.setItem('db_menu', JSON.stringify(state));
+            location.reload();
+        }
+
+        function resetSystem() {
+            localStorage.removeItem('sent');
+            alert("Sistema resetado!");
+            location.reload();
+        }
+
+        function toggleAdmin() { document.getElementById('admin-panel').classList.toggle('hidden'); }
+        document.getElementById('client-name').addEventListener('input', checkValidation);
+        
+        init();
+    </script>
+</body>
+</html>
