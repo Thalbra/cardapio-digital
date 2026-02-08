@@ -3,263 +3,288 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Cardápio Digital Premium</title>
+    <title>Cardápio Digital - High Performance</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;900&family=Poppins:wght@400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Poppins:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        /* CSS CORE */
-        :root { --primary: #059669; --bg: #f8fafc; --surface: #ffffff; }
-        body { background-color: var(--bg); font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
+        /* CSS VARIABLES SYSTEM */
+        :root {
+            --primary: #059669;
+            --bg-color: #f8fafc;
+            --surface: #ffffff;
+            --base-font-size: 16px;
+        }
+
+        html { font-size: var(--base-font-size); }
+        body { background-color: var(--bg-color); font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; transition: background 0.3s; }
         
-        /* Utilitários de Interface */
-        .btn-main { background-color: var(--primary); color: white; transition: transform 0.1s; }
+        /* Components */
+        .btn-main { background-color: var(--primary); color: white; transition: transform 0.1s, opacity 0.2s; }
         .btn-main:active { transform: scale(0.98); }
-        .card-selected { border: 3px solid var(--primary) !important; background-color: #f0fdf4 !important; }
+        .card-selected { border: 3px solid var(--primary) !important; background-color: #f0fdf4 !important; transform: scale(1.01); }
         .hidden { display: none !important; }
         .fade-in { animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
         
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         
-        /* Spinner de Carregamento */
-        .loader { border: 3px solid #f3f3f3; border-top: 3px solid var(--primary); border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; display: inline-block; }
+        /* Loader */
+        .loader { border: 3px solid rgba(255,255,255,0.3); border-top: 3px solid #fff; border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; display: inline-block; vertical-align: middle; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body class="text-slate-800">
 
-    <main class="max-w-md mx-auto min-h-screen pb-32 bg-[var(--surface)] shadow-2xl relative">
+    <main class="max-w-md mx-auto min-h-screen pb-32 bg-[var(--surface)] shadow-2xl relative transition-colors duration-300">
         
-        <header id="app-banner" class="h-56 bg-gray-200 bg-cover bg-center relative shadow-lg">
-            <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-            <div class="absolute bottom-4 left-6 text-white">
-                <h1 id="app-name" class="text-3xl font-black tracking-tight leading-none drop-shadow-md">Carregando...</h1>
-                <a id="app-insta" href="#" target="_blank" class="text-xs font-bold bg-white/20 backdrop-blur-md px-3 py-1 rounded-full mt-2 inline-block hover:bg-white/30 transition">
-                    📸 Instagram Oficial
+        <header id="app-banner" class="h-64 bg-gray-200 bg-cover bg-center relative shadow-lg transition-all duration-500">
+            <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
+            <div class="absolute bottom-4 left-6 text-white w-full pr-10">
+                <h1 id="app-name" class="text-3xl font-black tracking-tight leading-none drop-shadow-lg mb-2">Carregando...</h1>
+                <a id="app-insta" href="#" target="_blank" class="text-xs font-bold bg-white/20 backdrop-blur-md px-3 py-1 rounded-full inline-flex items-center gap-1 hover:bg-white/30 transition">
+                    <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+                    Siga no Instagram
                 </a>
             </div>
         </header>
 
-        <div class="px-6 py-6">
-            <div class="mb-8">
-                <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest">Seu Nome</label>
-                <input type="text" id="client-name" class="w-full p-4 text-lg bg-gray-50 border border-gray-200 rounded-xl focus:border-[var(--primary)] outline-none font-bold placeholder-gray-300" placeholder="Digite seu nome aqui...">
+        <div class="px-6 py-8">
+            <div class="mb-10">
+                <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1 block">Identificação</label>
+                <input type="text" id="client-name" class="w-full p-4 text-lg bg-gray-50 border-2 border-gray-100 rounded-xl focus:border-[var(--primary)] outline-none font-bold placeholder-gray-300 transition-colors" placeholder="Seu nome completo">
             </div>
 
-            <div class="flex justify-between items-end mb-4 border-b pb-2">
+            <div class="flex justify-between items-end mb-6 border-b border-gray-100 pb-4">
                 <div>
-                    <h2 class="text-xl font-bold text-gray-800">Cardápio</h2>
-                    <p class="text-xs text-gray-500">Toque na foto para escolher</p>
+                    <h2 class="text-2xl font-black text-gray-800 tracking-tight">Cardápio</h2>
+                    <p class="text-xs text-gray-500 font-medium">Selecione seu prato principal</p>
                 </div>
-                <button id="btn-reset" onclick="resetOrder()" class="hidden text-xs font-bold text-red-500 bg-red-50 px-3 py-2 rounded-lg">
-                    ✕ Cancelar Seleção
+                <button id="btn-reset" onclick="resetOrder()" class="hidden text-[10px] font-bold text-red-500 bg-red-50 hover:bg-red-100 px-3 py-2 rounded-lg uppercase tracking-wide transition">
+                    ✕ Trocar
                 </button>
             </div>
 
-            <div id="pratos-grid" class="space-y-4"></div>
+            <div id="pratos-grid" class="space-y-5"></div>
 
-            <div id="acc-area" class="hidden mt-8 fade-in">
-                <h3 class="font-bold text-lg mb-3 flex items-center gap-2">
-                    <span class="bg-[var(--primary)] w-2 h-6 rounded-full block"></span>
-                    Acompanhamentos
+            <div id="acc-area" class="hidden mt-10 fade-in bg-gray-50 p-5 rounded-2xl border border-gray-100">
+                <h3 class="font-black text-lg mb-4 text-gray-800 flex items-center gap-2">
+                    <span class="text-[var(--primary)]">●</span> Acompanhamentos
                 </h3>
-                <div id="acc-list" class="grid grid-cols-1 gap-2"></div>
+                <div id="acc-list" class="grid grid-cols-1 gap-3"></div>
             </div>
         </div>
 
-        <div class="fixed bottom-0 w-full max-w-md bg-white/90 backdrop-blur border-t p-4 z-50">
-            <button id="btn-send" onclick="submitOrder()" disabled class="w-full py-4 rounded-xl font-black text-lg uppercase tracking-widest shadow-lg transition-all opacity-50 bg-gray-400 text-white cursor-not-allowed">
-                Fazer Pedido
-            </button>
+        <div class="fixed bottom-0 left-0 w-full p-4 z-50 pointer-events-none">
+            <div class="max-w-md mx-auto pointer-events-auto">
+                <button id="btn-send" onclick="submitOrder()" disabled class="w-full py-5 rounded-2xl font-black text-lg uppercase tracking-widest shadow-2xl transition-all opacity-40 bg-gray-500 text-white cursor-not-allowed">
+                    Enviar Pedido
+                </button>
+            </div>
         </div>
     </main>
 
-    <div id="admin-modal" class="hidden fixed inset-0 z-[9999] bg-black/50 backdrop-blur-sm overflow-y-auto">
-        <div class="min-h-screen px-4 py-8 flex items-center justify-center">
-            <div class="bg-white w-full max-w-2xl rounded-3xl shadow-2xl overflow-hidden">
+    <div id="admin-modal" class="hidden fixed inset-0 z-[9999] bg-slate-900/95 backdrop-blur-md overflow-y-auto">
+        <div class="min-h-screen px-4 py-12 flex items-center justify-center">
+            <div class="bg-white w-full max-w-3xl rounded-[2rem] shadow-2xl overflow-hidden relative">
                 
-                <div class="bg-slate-900 p-6 flex justify-between items-center text-white">
+                <div class="bg-slate-100 p-6 flex justify-between items-center border-b border-slate-200">
                     <div>
-                        <h2 class="text-2xl font-bold">Painel de Controle</h2>
-                        <p class="text-xs text-slate-400">v6.0 Enterprise Edition</p>
+                        <h2 class="text-2xl font-black text-slate-800">Admin Console v7.0</h2>
+                        <p class="text-xs text-slate-500 font-bold uppercase">Configuração Avançada</p>
                     </div>
-                    <button onclick="toggleAdmin(false)" class="text-sm font-bold bg-white/10 px-4 py-2 rounded-lg hover:bg-red-600 transition">FECHAR</button>
+                    <button onclick="toggleAdmin(false)" class="text-xs font-bold bg-slate-200 text-slate-600 px-4 py-2 rounded-lg hover:bg-red-500 hover:text-white transition">SAIR</button>
                 </div>
 
-                <div class="p-6 space-y-8">
+                <div class="p-8 space-y-10">
                     
-                    <section class="space-y-4 border-b pb-6">
-                        <h3 class="text-sm font-black text-slate-400 uppercase tracking-widest">Identidade Visual</h3>
-                        
-                        <div class="grid md:grid-cols-2 gap-4">
+                    <section class="grid md:grid-cols-2 gap-8">
+                        <div class="space-y-4">
+                            <h3 class="admin-h3">Identidade & Segurança</h3>
                             <div>
-                                <label class="label-admin">Nome do Restaurante</label>
-                                <input type="text" id="adm-name" class="input-admin">
+                                <label class="admin-label">Nome do Estabelecimento</label>
+                                <input type="text" id="adm-name" class="admin-input">
                             </div>
                             <div>
-                                <label class="label-admin">Link do Instagram</label>
-                                <input type="text" id="adm-insta" class="input-admin">
+                                <label class="admin-label">Instagram URL</label>
+                                <input type="text" id="adm-insta" class="admin-input">
                             </div>
                             <div>
-                                <label class="label-admin">Cor Principal</label>
-                                <input type="color" id="adm-color" class="w-full h-10 rounded cursor-pointer">
+                                <label class="admin-label text-red-500">Alterar Senha Admin</label>
+                                <input type="text" id="adm-pass" class="admin-input border-red-100 focus:border-red-500" placeholder="Nova Senha">
+                            </div>
+                        </div>
+
+                        <div class="space-y-4">
+                            <h3 class="admin-h3">Estilização Visual</h3>
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="admin-label">Cor Primária</label>
+                                    <input type="color" id="adm-color" class="w-full h-10 rounded cursor-pointer border border-gray-200">
+                                </div>
+                                <div>
+                                    <label class="admin-label">Cor de Fundo</label>
+                                    <input type="color" id="adm-bg-color" class="w-full h-10 rounded cursor-pointer border border-gray-200">
+                                </div>
                             </div>
                             <div>
-                                <label class="label-admin">Banner Principal (Topo)</label>
-                                <input type="file" accept="image/*" onchange="compressAndPreview(this, 'banner-preview', 'adm-banner-data')" class="text-xs w-full">
+                                <label class="admin-label">Tamanho da Fonte: <span id="font-val">16px</span></label>
+                                <input type="range" id="adm-font-size" min="12" max="20" step="1" class="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[var(--primary)]">
+                            </div>
+                            <div>
+                                <label class="admin-label">Banner Principal (Alta Definição)</label>
+                                <input type="file" accept="image/*" onchange="processHighDefImage(this, 'banner-preview', 'adm-banner-data')" class="text-xs w-full file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-xs file:font-semibold file:bg-violet-50 file:text-violet-700 hover:file:bg-violet-100">
                                 <input type="hidden" id="adm-banner-data">
-                                <img id="banner-preview" class="h-12 w-full object-cover mt-2 rounded bg-gray-100">
+                                <img id="banner-preview" class="h-24 w-full object-cover mt-3 rounded-xl bg-gray-100 shadow-inner">
                             </div>
                         </div>
                     </section>
+
+                    <hr class="border-gray-100">
 
                     <section>
-                        <div class="flex justify-between items-center mb-4">
-                            <h3 class="text-sm font-black text-slate-400 uppercase tracking-widest">Cardápio (Ilimitado)</h3>
-                            <button onclick="addNewDish()" class="text-xs bg-green-100 text-green-700 px-3 py-1 rounded-full font-bold hover:bg-green-200">
-                                + Adicionar Prato
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="admin-h3">Gestão de Cardápio</h3>
+                            <button onclick="addNewDish()" class="bg-green-600 text-white text-xs font-bold px-4 py-2 rounded-full hover:bg-green-700 shadow-lg transition transform hover:-translate-y-0.5">
+                                + ADICIONAR ITEM
                             </button>
                         </div>
-                        
-                        <div id="adm-dishes-list" class="space-y-4"></div>
+                        <div id="adm-dishes-list" class="space-y-6"></div>
                     </section>
 
-                    <div class="pt-4 sticky bottom-0 bg-white border-t">
-                        <button id="btn-save-admin" onclick="saveSystemData()" class="w-full bg-slate-900 text-white py-4 rounded-xl font-bold text-lg hover:bg-black shadow-xl">
-                            SALVAR ALTERAÇÕES
+                    <div class="sticky bottom-0 bg-white pt-4 border-t border-gray-100">
+                        <button id="btn-save-admin" onclick="saveSystemData()" class="w-full bg-slate-800 text-white py-4 rounded-xl font-black text-lg hover:bg-black shadow-xl transition">
+                            SALVAR CONFIGURAÇÕES
                         </button>
-                        <p id="save-status" class="text-center text-xs mt-2 text-gray-400 h-4"></p>
+                        <p id="save-status" class="text-center text-xs mt-3 font-mono text-gray-400 min-h-[1.5em]"></p>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <div onclick="adminAuth()" class="fixed top-0 right-0 w-16 h-16 z-50 cursor-default"></div>
+    <div onclick="adminAuth()" class="fixed top-0 right-0 w-20 h-20 z-[50] cursor-default" title="Área Admin"></div>
 
     <script>
-        // ============================================================
-        // ⚙️ CONFIGURAÇÃO BACKEND
-        // ============================================================
-        const WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbwoKyvJ0-pYJYyf-Ou1Ru1aswRD0_txGZlUFDPTYfSV5v7o2HRBfRZ0Z5S3m8iutTDaDQ/exec"; // <--- ATENÇÃO AQUI
-        const DB_KEY = "APP_MENU_V6_ENTERPRISE";
+        // =================================================================
+        // 🔧 CONFIGURAÇÃO E CONSTANTES
+        // =================================================================
+        const WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbwoKyvJ0-pYJYyf-Ou1Ru1aswRD0_txGZlUFDPTYfSV5v7o2HRBfRZ0Z5S3m8iutTDaDQ/exec"; // << IMPORTANTE
+        const DB_KEY = "APP_MENU_V7_FINAL";
 
-        // Estado Global da Aplicação
-        let appData = {
+        // Estado Inicial Padrão
+        const defaultState = {
             meta: {
-                name: "Seu Restaurante",
+                name: "Restaurante Modelo",
                 insta: "https://instagram.com",
+                password: "123", // Senha Padrão
                 color: "#059669",
-                banner: "" // Base64 String
+                bgColor: "#f8fafc",
+                fontSize: "16",
+                banner: "" 
             },
-            menu: [] // Array dinâmico de pratos
+            menu: [
+                { name: "Exemplo de Prato", img: "", sides: "Arroz, Feijão, Salada" }
+            ]
         };
 
-        let currentOrder = {
-            dish: null,
-            sides: []
-        };
+        let appData = JSON.parse(JSON.stringify(defaultState));
+        let currentOrder = { dish: null, sides: [] };
 
-        // ============================================================
-        // 🚀 CORE FUNCTIONS (Inicialização)
-        // ============================================================
+        // =================================================================
+        // 🚀 INICIALIZAÇÃO E RENDERIZAÇÃO
+        // =================================================================
         window.onload = () => {
-            loadData();
-            renderApp();
-            document.getElementById('client-name').addEventListener('input', validateButton);
+            loadSystem();
+            setupListeners();
         };
 
-        function loadData() {
-            const saved = localStorage.getItem(DB_KEY);
-            if (saved) {
+        function loadSystem() {
+            const stored = localStorage.getItem(DB_KEY);
+            if (stored) {
                 try {
-                    appData = JSON.parse(saved);
-                } catch (e) {
-                    console.error("Erro critico no load, resetando db");
-                    localStorage.removeItem(DB_KEY);
-                }
-            } else {
-                // Dados Iniciais (Exemplo) se estiver vazio
-                addNewDishToState("Prato Exemplo", "Arroz, Feijão, Salada");
+                    const parsed = JSON.parse(stored);
+                    // Merge profundo simples para garantir compatibilidade de versões
+                    appData = { ...defaultState, ...parsed, meta: { ...defaultState.meta, ...parsed.meta } };
+                } catch(e) { console.error("Corrupt DB", e); }
             }
+            applyVisuals();
+            renderFrontend();
         }
 
-        function renderApp() {
-            // 1. Aplicar Cores e Textos
-            document.documentElement.style.setProperty('--primary', appData.meta.color);
+        function applyVisuals() {
+            const r = document.documentElement.style;
+            r.setProperty('--primary', appData.meta.color);
+            r.setProperty('--bg-color', appData.meta.bgColor);
+            r.setProperty('--base-font-size', appData.meta.fontSize + 'px');
+            
             document.getElementById('app-name').innerText = appData.meta.name;
             document.getElementById('app-insta').href = appData.meta.insta;
             
-            if (appData.meta.banner && appData.meta.banner.length > 100) {
+            if (appData.meta.banner) {
                 document.getElementById('app-banner').style.backgroundImage = `url('${appData.meta.banner}')`;
             }
+        }
 
-            // 2. Renderizar Lista de Pratos
+        function renderFrontend() {
             const grid = document.getElementById('pratos-grid');
             grid.innerHTML = "";
 
-            if (appData.menu.length === 0) {
-                grid.innerHTML = `<div class="text-center p-8 text-gray-400">Nenhum prato cadastrado. Acesse o Admin.</div>`;
-                return;
-            }
+            appData.menu.forEach((dish, idx) => {
+                const el = document.createElement('div');
+                el.className = "bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-5 cursor-pointer hover:shadow-lg transition-all transform hover:-translate-y-1 group";
+                el.id = `dish-card-${idx}`;
+                el.onclick = () => selectDish(idx);
 
-            appData.menu.forEach((dish, index) => {
-                const div = document.createElement('div');
-                div.className = "bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-4 cursor-pointer hover:shadow-md transition-all";
-                div.id = `dish-card-${index}`;
-                div.onclick = () => selectDish(index);
+                const imgSrc = dish.img || "https://placehold.co/400x400/e2e8f0/94a3b8?text=Sem+Foto";
 
-                // Imagem padrão se não tiver
-                const imgUrl = dish.img && dish.img.length > 50 ? dish.img : "https://via.placeholder.com/150?text=Sem+Foto";
-
-                div.innerHTML = `
-                    <img src="${imgUrl}" class="w-20 h-20 rounded-xl object-cover bg-gray-100 shrink-0">
+                el.innerHTML = `
+                    <div class="w-24 h-24 rounded-xl overflow-hidden shadow-md shrink-0 bg-gray-100">
+                        <img src="${imgSrc}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                    </div>
                     <div class="flex-1">
-                        <h3 class="font-bold text-gray-800 leading-tight">${dish.name}</h3>
-                        <p class="text-[10px] text-gray-400 mt-1 uppercase tracking-wider font-bold">Selecionar</p>
+                        <h3 class="font-bold text-gray-800 text-lg leading-tight mb-1">${dish.name}</h3>
+                        <span class="text-[10px] font-black text-[var(--primary)] uppercase tracking-widest bg-green-50 px-2 py-1 rounded">Selecionar</span>
                     </div>
                 `;
-                grid.appendChild(div);
+                grid.appendChild(el);
             });
         }
 
-        // ============================================================
-        // 🛍️ LÓGICA DE PEDIDOS (Frontend)
-        // ============================================================
+        // =================================================================
+        // 🛒 LÓGICA DE PEDIDO
+        // =================================================================
         function selectDish(index) {
             currentOrder.dish = appData.menu[index];
             currentOrder.sides = [];
 
-            // UI Feedback
+            // UI Changes
             document.querySelectorAll('[id^="dish-card-"]').forEach(el => el.classList.add('hidden'));
             const selected = document.getElementById(`dish-card-${index}`);
             selected.classList.remove('hidden');
             selected.classList.add('card-selected');
-
             document.getElementById('btn-reset').classList.remove('hidden');
-            
-            // Renderizar Acompanhamentos
+
+            // Render Sides
             const accArea = document.getElementById('acc-area');
             const accList = document.getElementById('acc-list');
             accArea.classList.remove('hidden');
-            
-            // Tratamento de String para Array (separado por virgula)
-            const sidesArray = currentOrder.dish.sides.split(',').map(s => s.trim()).filter(s => s !== "");
 
-            accList.innerHTML = sidesArray.map(side => `
-                <label class="flex items-center p-3 bg-white border rounded-xl cursor-pointer hover:bg-gray-50">
-                    <input type="checkbox" onchange="toggleSide('${side}')" class="w-5 h-5 rounded text-[var(--primary)] focus:ring-[var(--primary)]">
-                    <span class="ml-3 text-sm font-medium text-gray-700">${side}</span>
+            const options = currentOrder.dish.sides.split(',').map(s => s.trim()).filter(s => s);
+            
+            accList.innerHTML = options.map(opt => `
+                <label class="flex items-center p-4 bg-white border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-50 transition-colors">
+                    <input type="checkbox" onchange="toggleSide('${opt}')" class="w-6 h-6 rounded border-gray-300 text-[var(--primary)] focus:ring-[var(--primary)]">
+                    <span class="ml-3 font-medium text-gray-700">${opt}</span>
                 </label>
             `).join('');
-
-            validateButton();
+            
+            validateForm();
         }
 
         function toggleSide(name) {
             const i = currentOrder.sides.indexOf(name);
             if (i > -1) currentOrder.sides.splice(i, 1);
             else currentOrder.sides.push(name);
-            validateButton();
+            validateForm();
         }
 
         function resetOrder() {
@@ -270,38 +295,37 @@
             });
             document.getElementById('btn-reset').classList.add('hidden');
             document.getElementById('acc-area').classList.add('hidden');
-            validateButton();
+            validateForm();
         }
 
-        function validateButton() {
+        function validateForm() {
             const name = document.getElementById('client-name').value.trim();
             const btn = document.getElementById('btn-send');
-            
-            const isValid = name.length > 2 && currentOrder.dish !== null && currentOrder.sides.length > 0;
+            const isValid = name.length > 2 && currentOrder.dish && currentOrder.sides.length > 0;
 
             if (isValid) {
                 btn.disabled = false;
-                btn.classList.remove('opacity-50', 'bg-gray-400', 'cursor-not-allowed');
-                btn.classList.add('btn-main', 'cursor-pointer');
+                btn.className = "w-full py-5 rounded-2xl font-black text-lg uppercase tracking-widest shadow-2xl transition-all btn-main cursor-pointer";
+                btn.innerHTML = "Enviar Pedido";
             } else {
                 btn.disabled = true;
-                btn.classList.add('opacity-50', 'bg-gray-400', 'cursor-not-allowed');
-                btn.classList.remove('btn-main', 'cursor-pointer');
+                btn.className = "w-full py-5 rounded-2xl font-black text-lg uppercase tracking-widest shadow-2xl transition-all opacity-40 bg-gray-500 text-white cursor-not-allowed";
             }
         }
 
         async function submitOrder() {
             const btn = document.getElementById('btn-send');
-            const originalText = btn.innerText;
-            
-            btn.innerHTML = "<span class='loader'></span> Enviando...";
+            btn.innerHTML = '<span class="loader"></span> Enviando...';
             btn.disabled = true;
 
+            const now = new Date();
+            const dataFormatada = now.toLocaleDateString('pt-BR') + ' ' + now.toLocaleTimeString('pt-BR');
+
             const payload = {
-                nome: document.getElementById('client-name').value,
-                prato: currentOrder.dish.name,
-                acompanhamentos: currentOrder.sides.join(', '),
-                data: new Date().toLocaleString('pt-BR')
+                dataHora: dataFormatada,
+                nome: document.getElementById('client-name').value.toUpperCase(),
+                prato: currentOrder.dish.name.toUpperCase(),
+                acompanhamentos: currentOrder.sides.join(', ').toUpperCase()
             };
 
             try {
@@ -311,174 +335,188 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify(payload)
                 });
-                alert("✅ Pedido Recebido com Sucesso!");
+                alert("✅ Pedido Confirmado com Sucesso!");
                 location.reload();
             } catch (error) {
-                alert("Erro de conexão. Tente novamente.");
-                btn.innerText = originalText;
+                console.error(error);
+                alert("❌ Erro de conexão. Tente novamente.");
+                btn.innerHTML = "Tentar Novamente";
                 btn.disabled = false;
             }
         }
 
-        // ============================================================
-        // 🛡️ ADMINISTRAÇÃO PROFISSIONAL
-        // ============================================================
+        // =================================================================
+        // 🛡️ ADMINISTRAÇÃO (BACKEND LOGIC)
+        // =================================================================
         function adminAuth() {
-            if (prompt("Senha de Acesso:") === "123") {
+            const inputPass = prompt("Senha de Administrador:");
+            if (inputPass === appData.meta.password) {
                 toggleAdmin(true);
-                populateAdmin();
+                populateAdminUI();
+            } else if (inputPass !== null) {
+                alert("Acesso Negado.");
             }
         }
 
         function toggleAdmin(show) {
-            const modal = document.getElementById('admin-modal');
-            show ? modal.classList.remove('hidden') : modal.classList.add('hidden');
+            document.getElementById('admin-modal').classList.toggle('hidden', !show);
         }
 
-        // Renderiza o formulário do Admin com os dados atuais
-        function populateAdmin() {
+        function populateAdminUI() {
+            // Populate Meta
             document.getElementById('adm-name').value = appData.meta.name;
             document.getElementById('adm-insta').value = appData.meta.insta;
+            document.getElementById('adm-pass').value = appData.meta.password;
             document.getElementById('adm-color').value = appData.meta.color;
+            document.getElementById('adm-bg-color').value = appData.meta.bgColor || "#f8fafc";
+            document.getElementById('adm-font-size').value = appData.meta.fontSize || 16;
+            document.getElementById('font-val').innerText = (appData.meta.fontSize || 16) + 'px';
             document.getElementById('adm-banner-data').value = appData.meta.banner;
             document.getElementById('banner-preview').src = appData.meta.banner || "";
 
-            const list = document.getElementById('adm-dishes-list');
-            list.innerHTML = ""; // Limpa lista
-
-            appData.menu.forEach((dish, index) => {
-                const item = document.createElement('div');
-                item.className = "bg-slate-50 p-4 rounded-xl border border-slate-200 relative";
-                item.innerHTML = `
-                    <button onclick="removeDish(${index})" class="absolute top-2 right-2 text-red-500 font-bold text-xs hover:bg-red-100 p-1 rounded">EXCLUIR</button>
-                    <div class="space-y-3">
+            // Populate Dishes
+            const container = document.getElementById('adm-dishes-list');
+            container.innerHTML = "";
+            
+            appData.menu.forEach((dish, i) => {
+                const row = document.createElement('div');
+                row.className = "bg-slate-50 p-5 rounded-2xl border border-slate-200 relative group";
+                row.innerHTML = `
+                    <button onclick="deleteDish(${i})" class="absolute top-4 right-4 text-xs font-bold text-red-400 hover:text-red-600 border border-red-200 px-2 py-1 rounded">EXCLUIR</button>
+                    <div class="grid gap-4">
                         <div>
-                            <label class="label-admin">Nome do Prato</label>
-                            <input type="text" value="${dish.name}" id="adm-dish-name-${index}" class="input-admin font-bold">
+                            <label class="admin-label">Nome do Prato</label>
+                            <input type="text" id="d-name-${i}" value="${dish.name}" class="admin-input font-bold text-gray-800">
                         </div>
-                        <div class="flex gap-3">
-                            <div class="w-20">
-                                <img src="${dish.img || ''}" id="prev-d-${index}" class="w-16 h-16 rounded object-cover bg-gray-200 block mb-1">
-                                <input type="file" onchange="compressAndPreview(this, 'prev-d-${index}', 'val-d-${index}')" class="text-[10px] w-full">
-                                <input type="hidden" id="val-d-${index}" value="${dish.img || ''}">
+                        <div class="flex gap-4">
+                            <div class="w-24 shrink-0">
+                                <img src="${dish.img || ''}" id="d-prev-${i}" class="w-full h-20 object-cover rounded-lg bg-gray-200 mb-2">
+                                <label class="cursor-pointer bg-slate-200 hover:bg-slate-300 text-slate-700 text-[10px] font-bold py-1 px-2 rounded block text-center">
+                                    ALTERAR FOTO
+                                    <input type="file" onchange="processHighDefImage(this, 'd-prev-${i}', 'd-val-${i}')" class="hidden" accept="image/*">
+                                </label>
+                                <input type="hidden" id="d-val-${i}" value="${dish.img || ''}">
                             </div>
                             <div class="flex-1">
-                                <label class="label-admin">Acompanhamentos (Separados por vírgula)</label>
-                                <textarea id="adm-dish-acc-${index}" class="input-admin h-20 text-xs">${dish.sides}</textarea>
+                                <label class="admin-label">Acompanhamentos (Separar por vírgula)</label>
+                                <textarea id="d-sides-${i}" class="admin-input h-24 text-sm resize-none">${dish.sides}</textarea>
                             </div>
                         </div>
                     </div>
                 `;
-                list.appendChild(item);
+                container.appendChild(row);
             });
-        }
 
-        // Função para adicionar novo prato ao State e re-renderizar Admin
-        function addNewDish() {
-            addNewDishToState("Novo Prato", "Arroz, Feijão");
-            populateAdmin(); // Atualiza a tela
-        }
-
-        function addNewDishToState(name, sides) {
-            appData.menu.push({
-                name: name,
-                img: "",
-                sides: sides
-            });
-        }
-
-        function removeDish(index) {
-            if (confirm("Tem certeza que deseja excluir este prato?")) {
-                appData.menu.splice(index, 1);
-                populateAdmin();
+            // Live Font Preview
+            document.getElementById('adm-font-size').oninput = (e) => {
+                document.getElementById('font-val').innerText = e.target.value + 'px';
             }
         }
 
-        // Salvar tudo
+        function addNewDish() {
+            appData.menu.push({ name: "Novo Prato", img: "", sides: "Opção 1, Opção 2" });
+            populateAdminUI();
+        }
+
+        function deleteDish(idx) {
+            if(confirm("Remover este item do cardápio?")) {
+                appData.menu.splice(idx, 1);
+                populateAdminUI();
+            }
+        }
+
         function saveSystemData() {
             const btn = document.getElementById('btn-save-admin');
             const status = document.getElementById('save-status');
-            
-            btn.innerText = "Salvando...";
-            
-            // 1. Capturar Meta
+            btn.innerText = "Processando...";
+            btn.disabled = true;
+
+            // Capture Data
             appData.meta.name = document.getElementById('adm-name').value;
             appData.meta.insta = document.getElementById('adm-insta').value;
+            appData.meta.password = document.getElementById('adm-pass').value; // Save new password
             appData.meta.color = document.getElementById('adm-color').value;
+            appData.meta.bgColor = document.getElementById('adm-bg-color').value;
+            appData.meta.fontSize = document.getElementById('adm-font-size').value;
             appData.meta.banner = document.getElementById('adm-banner-data').value;
 
-            // 2. Capturar Pratos da Tela (para pegar edições de texto)
-            appData.menu.forEach((dish, index) => {
-                const nameInput = document.getElementById(`adm-dish-name-${index}`);
-                const accInput = document.getElementById(`adm-dish-acc-${index}`);
-                const imgInput = document.getElementById(`val-d-${index}`); // Hidden field
-
-                if (nameInput) dish.name = nameInput.value;
-                if (accInput) dish.sides = accInput.value;
-                if (imgInput) dish.img = imgInput.value;
+            // Capture Menu
+            appData.menu.forEach((_, i) => {
+                const name = document.getElementById(`d-name-${i}`);
+                if(name) {
+                    appData.menu[i].name = name.value;
+                    appData.menu[i].sides = document.getElementById(`d-sides-${i}`).value;
+                    appData.menu[i].img = document.getElementById(`d-val-${i}`).value;
+                }
             });
 
-            // 3. Persistir
+            // Persist
             try {
                 localStorage.setItem(DB_KEY, JSON.stringify(appData));
-                status.innerText = "Dados salvos com sucesso!";
-                btn.innerText = "SALVAR ALTERAÇÕES";
-                setTimeout(() => location.reload(), 500);
+                status.innerText = "✅ Dados salvos com sucesso! Recarregando...";
+                status.className = "text-center text-xs mt-3 font-bold text-green-600";
+                setTimeout(() => location.reload(), 1000);
             } catch (e) {
-                console.error(e);
-                alert("Erro: Limite de armazenamento excedido. Tente usar imagens menores.");
-                btn.innerText = "ERRO AO SALVAR";
+                btn.innerText = "ERRO: IMAGENS MUITO GRANDES";
+                status.innerText = "⚠️ O navegador não suporta tantas imagens grandes. Tente usar fotos menores.";
+                status.className = "text-center text-xs mt-3 font-bold text-red-600";
+                btn.disabled = false;
             }
         }
 
-        // ============================================================
-        // 🔧 ENGINE DE IMAGENS (COMPRESSÃO)
-        // ============================================================
-        function compressAndPreview(input, imgPreviewId, hiddenInputId) {
+        // =================================================================
+        // 🖼️ PROCESSAMENTO DE IMAGEM (HIGH DEFINITION)
+        // =================================================================
+        function processHighDefImage(input, viewId, dataId) {
             if (input.files && input.files[0]) {
                 const file = input.files[0];
                 const reader = new FileReader();
-                
-                reader.onload = function(event) {
+                reader.onload = function(e) {
                     const img = new Image();
-                    img.src = event.target.result;
-                    
+                    img.src = e.target.result;
                     img.onload = function() {
                         const canvas = document.createElement('canvas');
                         const ctx = canvas.getContext('2d');
                         
-                        // Configuração de Compressão (Max 800px width)
-                        const maxWidth = 800;
-                        const scaleSize = maxWidth / img.width;
-                        const newWidth = maxWidth;
-                        const newHeight = img.height * scaleSize;
+                        // Configuração HD (Max 1920px - Full HD)
+                        const MAX_WIDTH = 1920; 
+                        let width = img.width;
+                        let height = img.height;
 
-                        canvas.width = newWidth;
-                        canvas.height = newHeight;
+                        if (width > MAX_WIDTH) {
+                            height *= MAX_WIDTH / width;
+                            width = MAX_WIDTH;
+                        }
+
+                        canvas.width = width;
+                        canvas.height = height;
+                        ctx.drawImage(img, 0, 0, width, height);
+
+                        // Compressão Otimizada (0.9 = Alta Qualidade)
+                        // Isso previne que arquivos raw de 10MB quebrem o LocalStorage
+                        const dataUrl = canvas.toDataURL('image/jpeg', 0.9); 
                         
-                        ctx.drawImage(img, 0, 0, newWidth, newHeight);
-                        
-                        // Converte para JPEG com qualidade 0.7 (70%)
-                        const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
-                        
-                        // Atualiza UI
-                        document.getElementById(imgPreviewId).src = compressedBase64;
-                        document.getElementById(hiddenInputId).value = compressedBase64;
+                        document.getElementById(viewId).src = dataUrl;
+                        document.getElementById(dataId).value = dataUrl;
                     }
                 }
                 reader.readAsDataURL(file);
             }
         }
 
-        // CSS Helpers for Admin Input
+        function setupListeners() {
+            document.getElementById('client-name').addEventListener('input', validateForm);
+        }
+
+        // CSS Helper for Admin
         const style = document.createElement('style');
         style.innerHTML = `
-            .label-admin { display:block; font-size: 10px; font-weight: bold; color: #94a3b8; text-transform: uppercase; margin-bottom: 4px; }
-            .input-admin { width: 100%; padding: 8px; border: 1px solid #e2e8f0; border-radius: 8px; font-size: 14px; outline: none; transition: border-color 0.2s; }
-            .input-admin:focus { border-color: var(--primary); }
+            .admin-label { display:block; font-size: 11px; font-weight: 800; color: #64748b; text-transform: uppercase; margin-bottom: 5px; letter-spacing: 0.05em; }
+            .admin-input { width: 100%; padding: 10px; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 14px; outline: none; transition: 0.2s; }
+            .admin-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(5, 150, 105, 0.1); }
+            .admin-h3 { font-size: 14px; font-weight: 900; color: #334155; text-transform: uppercase; letter-spacing: 0.05em; border-left: 4px solid var(--primary); padding-left: 10px; }
         `;
         document.head.appendChild(style);
-
     </script>
 </body>
 </html>
