@@ -3,23 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TremBão - Cozinha Brasileira</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <style>
-        .modal { display: none; position: fixed; z-index: 50; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); }
-        .modal.active { display: flex; }
-        .hide-scroll::-webkit-scrollbar { display: none; }
-        .hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
-    </style>
+    <title>TremBão - Cardápio Digital</title>
+    
+    <link rel="stylesheet" href="./styles/global.css">
+    <link rel="stylesheet" href="./styles/main.css">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
 </head>
-<body class="bg-slate-50 min-h-screen">
+<body>
 
     <div id="app">
-        </div>
-
-    <script>
-        // CONFIGURAÇÕES MESTRE (JSON + WEBHOOK)
-        const WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbwoKyvJ0-pYJYyf-Ou1Ru1aswRD0_txGZlUFDPTYfSV5v7o2HRBfRZ0Z5S3m8iutTDaDQ/exec";
+        <header>
+            <h1>TremBão - Cozinha Brasileira</h1>
+        </header>
         
-        const defaultState = {"meta":{"name":"Cozinha Brasileira TremBão","insta":"https://www.instagram.com/trembaocozinhabrasileira/","password":"926844","color":"#059669","bgColor":"#f8fafc","fontSize":"15","banner":"data:image/jpeg;base64,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
+        <main id="menu-container">
+            <p>Carregando cardápio...</p>
+        </main>
+    </div>
+
+    <script type="module" src="./js/app.js"></script>
+</body>
+</html>
