@@ -2,28 +2,347 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TremBão - Cardápio Digital</title>
-    
-    <link rel="stylesheet" href="./styles/global.css">
-    <link rel="stylesheet" href="./styles/main.css">
-    
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Cardápio Digital - High Performance</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&family=Poppins:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root { --primary: #059669; --bg-color: #f8fafc; --surface: #ffffff; --base-font-size: 16px; }
+        html { font-size: var(--base-font-size); }
+        body { background-color: var(--bg-color); font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; }
+        .btn-main { background-color: var(--primary); color: white; transition: 0.2s; }
+        .card-selected { border: 3px solid var(--primary) !important; background-color: #f0fdf4 !important; }
+        .hidden { display: none !important; }
+        .fade-in { animation: fadeIn 0.4s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .loader { border: 3px solid rgba(255,255,255,0.3); border-top: 3px solid #fff; border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; display: inline-block; vertical-align: middle; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
 </head>
-<body>
+<body class="text-slate-800">
 
-    <div id="app">
-        <header>
-            <h1>TremBão - Cozinha Brasileira</h1>
+    <main class="max-w-md mx-auto min-h-screen pb-32 bg-[var(--surface)] shadow-2xl relative">
+        <header id="app-banner" class="h-64 bg-gray-200 bg-cover bg-center relative shadow-lg">
+            <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent"></div>
+            <div class="absolute bottom-4 left-6 text-white w-full pr-10">
+                <h1 id="app-name" class="text-3xl font-black leading-none drop-shadow-lg mb-2">Carregando...</h1>
+                <a id="app-insta" href="#" target="_blank" class="text-xs font-bold bg-white/20 backdrop-blur-md px-3 py-1 rounded-full hover:bg-white/30 transition">📸 Instagram</a>
+            </div>
         </header>
-        
-        <main id="menu-container">
-            <p>Carregando cardápio...</p>
-        </main>
+
+        <div class="px-6 py-8">
+            <div class="mb-10">
+                <label class="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1 block">Identificação</label>
+                <input type="text" id="client-name" class="w-full p-4 text-lg bg-gray-50 border-2 border-gray-100 rounded-xl focus:border-[var(--primary)] outline-none font-bold" placeholder="Seu nome completo">
+            </div>
+
+            <div class="flex justify-between items-end mb-6 border-b border-gray-100 pb-4">
+                <div>
+                    <h2 class="text-2xl font-black text-gray-800">Cardápio</h2>
+                    <p class="text-xs text-gray-500 font-medium">Selecione seu prato principal</p>
+                </div>
+                <button id="btn-reset" onclick="resetOrder()" class="hidden text-[10px] font-bold text-red-500 bg-red-50 px-3 py-2 rounded-lg uppercase">✕ Trocar</button>
+            </div>
+
+            <div id="pratos-grid" class="space-y-5"></div>
+
+            <div id="acc-area" class="hidden mt-10 fade-in bg-gray-50 p-5 rounded-2xl border border-gray-100">
+                <h3 class="font-black text-lg mb-4 text-gray-800">● Acompanhamentos</h3>
+                <div id="acc-list" class="grid grid-cols-1 gap-3"></div>
+            </div>
+        </div>
+
+        <div class="fixed bottom-0 left-0 w-full p-4 z-50 pointer-events-none">
+            <div class="max-w-md mx-auto pointer-events-auto">
+                <button id="btn-send" onclick="submitOrder()" disabled class="w-full py-5 rounded-2xl font-black text-lg uppercase tracking-widest shadow-2xl opacity-40 bg-gray-500 text-white cursor-not-allowed transition-all">
+                    Enviar Pedido
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <div id="admin-modal" class="hidden fixed inset-0 z-[9999] bg-slate-900/95 backdrop-blur-md overflow-y-auto">
+        <div class="min-h-screen px-4 py-12 flex items-center justify-center">
+            <div class="bg-white w-full max-w-3xl rounded-[2rem] shadow-2xl overflow-hidden relative">
+                <div class="bg-slate-100 p-6 flex justify-between items-center border-b border-slate-200">
+                    <h2 class="text-xl font-black text-slate-800">Admin v7.1</h2>
+                    <button onclick="toggleAdmin(false)" class="text-xs font-bold bg-slate-200 px-4 py-2 rounded-lg">SAIR</button>
+                </div>
+
+                <div class="p-8 space-y-8">
+                    <div class="bg-yellow-50 border-2 border-yellow-400 p-6 rounded-xl">
+                        <h3 class="text-lg font-black text-yellow-800 mb-2">⚠️ PUBLICAR SITE</h3>
+                        <p class="text-xs text-yellow-800 mb-4 font-bold">Para que o cardápio funcione em outros celulares, clique no botão abaixo, copie o código e substitua a variável 'defaultState' no HTML.</p>
+                        <button onclick="exportDataToClipboard()" class="bg-yellow-500 text-white font-black py-3 px-6 rounded-xl w-full hover:bg-yellow-600">
+                            COPIAR CÓDIGO DE DADOS (JSON)
+                        </button>
+                        <textarea id="export-area" class="w-full h-20 mt-4 text-[10px] font-mono p-2 border rounded hidden"></textarea>
+                    </div>
+
+                    <div class="space-y-4">
+                        <h3 class="font-bold text-xs uppercase text-slate-400">Dados Básicos</h3>
+                        <input type="text" id="adm-name" class="w-full p-3 border rounded-lg text-sm" placeholder="Nome Restaurante">
+                        <input type="text" id="adm-insta" class="w-full p-3 border rounded-lg text-sm" placeholder="Instagram Link">
+                        <input type="password" id="adm-pass" class="w-full p-3 border rounded-lg text-sm" placeholder="Senha Admin">
+                        
+                        <h3 class="font-bold text-xs uppercase text-slate-400 mt-4">Visual</h3>
+                        <div class="grid grid-cols-2 gap-4">
+                            <input type="color" id="adm-color" class="w-full h-10 rounded">
+                            <input type="color" id="adm-bg-color" class="w-full h-10 rounded">
+                        </div>
+                        <label class="block text-xs font-bold mt-2">Tamanho da Fonte: <span id="font-val">16px</span></label>
+                        <input type="range" id="adm-font-size" min="12" max="20" class="w-full">
+                        
+                        <label class="block text-xs font-bold mt-2">Banner Topo</label>
+                        <input type="file" accept="image/*" onchange="processHighDefImage(this, 'banner-preview', 'adm-banner-data')" class="text-xs w-full">
+                        <input type="hidden" id="adm-banner-data">
+                        <img id="banner-preview" class="h-24 w-full object-cover mt-2 rounded-xl bg-gray-100">
+                    </div>
+
+                    <div class="border-t pt-6">
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="font-bold text-xs uppercase text-slate-400">Pratos</h3>
+                            <button onclick="addNewDish()" class="bg-green-600 text-white text-xs font-bold px-3 py-1 rounded-full">+ ADD</button>
+                        </div>
+                        <div id="adm-dishes-list" class="space-y-4"></div>
+                    </div>
+
+                    <button onclick="saveSystemData()" class="w-full bg-slate-800 text-white py-4 rounded-xl font-black text-lg">SALVAR TUDO</button>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <script type="module" src="./js/app.js"></script>
+    <div onclick="adminAuth()" class="fixed top-0 right-0 w-20 h-20 z-[50]"></div>
+
+    <script>
+        const WEBHOOK_URL = "INSIRA_SUA_URL_DO_GOOGLE_SHEETS_AQUI"; 
+        const DB_KEY = "APP_MENU_V7_FINAL";
+
+        // =================================================================
+        // ÁREA ONDE VOCÊ COLARÁ OS DADOS DEPOIS
+        // =================================================================
+        const defaultState = {
+            meta: { name: "Carregando...", insta: "#", password: "123", color: "#059669", bgColor: "#f8fafc", fontSize: "16", banner: "" },
+            menu: []
+        };
+        // =================================================================
+
+        let appData = JSON.parse(JSON.stringify(defaultState));
+        let currentOrder = { dish: null, sides: [] };
+
+        window.onload = () => { loadSystem(); setupListeners(); };
+
+        function loadSystem() {
+            // Tenta carregar do LocalStorage (SEU PC), se não tiver, usa o defaultState (VISITANTE)
+            const stored = localStorage.getItem(DB_KEY);
+            if (stored) {
+                try {
+                    const parsed = JSON.parse(stored);
+                    appData = { ...defaultState, ...parsed, meta: { ...defaultState.meta, ...parsed.meta } };
+                } catch(e) { console.error(e); }
+            } else {
+                // Se não tem dados locais, usa o defaultState (Isso acontece nos outros celulares)
+                appData = JSON.parse(JSON.stringify(defaultState));
+            }
+            applyVisuals();
+            renderFrontend();
+        }
+
+        function applyVisuals() {
+            const r = document.documentElement.style;
+            r.setProperty('--primary', appData.meta.color);
+            r.setProperty('--bg-color', appData.meta.bgColor);
+            r.setProperty('--base-font-size', appData.meta.fontSize + 'px');
+            document.getElementById('app-name').innerText = appData.meta.name;
+            document.getElementById('app-insta').href = appData.meta.insta;
+            if (appData.meta.banner) document.getElementById('app-banner').style.backgroundImage = `url('${appData.meta.banner}')`;
+        }
+
+        function renderFrontend() {
+            const grid = document.getElementById('pratos-grid');
+            grid.innerHTML = "";
+            if(appData.menu.length === 0) grid.innerHTML = "<p class='text-center text-gray-400 p-4'>Cardápio sendo atualizado...</p>";
+            
+            appData.menu.forEach((dish, idx) => {
+                const el = document.createElement('div');
+                el.className = "bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex items-center gap-5 cursor-pointer hover:shadow-lg transition-all transform hover:-translate-y-1 group";
+                el.id = `dish-card-${idx}`;
+                el.onclick = () => selectDish(idx);
+                const imgSrc = dish.img || "https://placehold.co/400x400/e2e8f0/94a3b8?text=Sem+Foto";
+                el.innerHTML = `
+                    <div class="w-24 h-24 rounded-xl overflow-hidden shadow-md shrink-0 bg-gray-100">
+                        <img src="${imgSrc}" class="w-full h-full object-cover">
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="font-bold text-gray-800 text-lg leading-tight mb-1">${dish.name}</h3>
+                        <span class="text-[10px] font-black text-[var(--primary)] uppercase tracking-widest bg-green-50 px-2 py-1 rounded">Selecionar</span>
+                    </div>
+                `;
+                grid.appendChild(el);
+            });
+        }
+
+        function selectDish(index) {
+            currentOrder.dish = appData.menu[index];
+            currentOrder.sides = [];
+            document.querySelectorAll('[id^="dish-card-"]').forEach(el => el.classList.add('hidden'));
+            const selected = document.getElementById(`dish-card-${index}`);
+            selected.classList.remove('hidden');
+            selected.classList.add('card-selected');
+            document.getElementById('btn-reset').classList.remove('hidden');
+            const accArea = document.getElementById('acc-area');
+            const accList = document.getElementById('acc-list');
+            accArea.classList.remove('hidden');
+            const options = currentOrder.dish.sides.split(',').map(s => s.trim()).filter(s => s);
+            accList.innerHTML = options.map(opt => `
+                <label class="flex items-center p-4 bg-white border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-50 transition-colors">
+                    <input type="checkbox" onchange="toggleSide('${opt}')" class="w-6 h-6 rounded text-[var(--primary)] focus:ring-[var(--primary)]">
+                    <span class="ml-3 font-medium text-gray-700">${opt}</span>
+                </label>
+            `).join('');
+            validateForm();
+        }
+
+        function toggleSide(name) {
+            const i = currentOrder.sides.indexOf(name);
+            if (i > -1) currentOrder.sides.splice(i, 1); else currentOrder.sides.push(name);
+            validateForm();
+        }
+
+        function resetOrder() {
+            currentOrder = { dish: null, sides: [] };
+            document.querySelectorAll('[id^="dish-card-"]').forEach(el => { el.classList.remove('hidden'); el.classList.remove('card-selected'); });
+            document.getElementById('btn-reset').classList.add('hidden');
+            document.getElementById('acc-area').classList.add('hidden');
+            validateForm();
+        }
+
+        function validateForm() {
+            const name = document.getElementById('client-name').value.trim();
+            const btn = document.getElementById('btn-send');
+            if (name.length > 2 && currentOrder.dish && currentOrder.sides.length > 0) {
+                btn.disabled = false; btn.className = "w-full py-5 rounded-2xl font-black text-lg uppercase tracking-widest shadow-2xl transition-all btn-main cursor-pointer";
+            } else {
+                btn.disabled = true; btn.className = "w-full py-5 rounded-2xl font-black text-lg uppercase tracking-widest shadow-2xl transition-all opacity-40 bg-gray-500 text-white cursor-not-allowed";
+            }
+        }
+
+        async function submitOrder() {
+            const btn = document.getElementById('btn-send');
+            btn.innerHTML = '<span class="loader"></span> Enviando...';
+            btn.disabled = true;
+            const now = new Date();
+            const payload = {
+                dataHora: now.toLocaleDateString('pt-BR') + ' ' + now.toLocaleTimeString('pt-BR'),
+                nome: document.getElementById('client-name').value.toUpperCase(),
+                prato: currentOrder.dish.name.toUpperCase(),
+                acompanhamentos: currentOrder.sides.join(', ').toUpperCase()
+            };
+            try {
+                await fetch(WEBHOOK_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+                alert("✅ Pedido Confirmado!"); location.reload();
+            } catch (error) { alert("Erro de conexão."); btn.innerHTML = "Tentar Novamente"; btn.disabled = false; }
+        }
+
+        // ADMIN FUNCTIONS
+        function adminAuth() {
+            // Se a senha já foi alterada no PC local, usa ela. Se não, usa a padrão "123"
+            const currentPass = appData.meta.password || "123";
+            if (prompt("Senha:") === currentPass) { toggleAdmin(true); populateAdminUI(); }
+        }
+
+        function toggleAdmin(show) { document.getElementById('admin-modal').classList.toggle('hidden', !show); }
+
+        function populateAdminUI() {
+            document.getElementById('adm-name').value = appData.meta.name;
+            document.getElementById('adm-insta').value = appData.meta.insta;
+            document.getElementById('adm-pass').value = appData.meta.password;
+            document.getElementById('adm-color').value = appData.meta.color;
+            document.getElementById('adm-bg-color').value = appData.meta.bgColor || "#f8fafc";
+            document.getElementById('adm-font-size').value = appData.meta.fontSize || 16;
+            document.getElementById('font-val').innerText = (appData.meta.fontSize || 16) + 'px';
+            document.getElementById('adm-banner-data').value = appData.meta.banner;
+            document.getElementById('banner-preview').src = appData.meta.banner || "";
+            const container = document.getElementById('adm-dishes-list');
+            container.innerHTML = "";
+            appData.menu.forEach((dish, i) => {
+                const row = document.createElement('div');
+                row.className = "bg-slate-50 p-5 rounded-2xl border border-slate-200 relative";
+                row.innerHTML = `
+                    <button onclick="deleteDish(${i})" class="absolute top-4 right-4 text-xs font-bold text-red-500 border px-2 py-1 rounded">EXCLUIR</button>
+                    <input type="text" id="d-name-${i}" value="${dish.name}" class="w-full p-2 mb-2 border rounded font-bold" placeholder="Nome Prato">
+                    <div class="flex gap-2">
+                        <div class="w-20"><img src="${dish.img||''}" id="d-prev-${i}" class="w-full h-16 rounded bg-gray-200"><input type="file" onchange="processHighDefImage(this, 'd-prev-${i}', 'd-val-${i}')" class="hidden"><input type="hidden" id="d-val-${i}" value="${dish.img||''}"></div>
+                        <textarea id="d-sides-${i}" class="flex-1 p-2 border rounded text-xs" placeholder="Acompanhamentos">${dish.sides}</textarea>
+                    </div>
+                    <button onclick="document.querySelector('#d-prev-${i}').nextElementSibling.click()" class="text-[10px] bg-slate-200 px-2 py-1 rounded mt-1">Trocar Foto</button>
+                `;
+                container.appendChild(row);
+            });
+            document.getElementById('adm-font-size').oninput = (e) => { document.getElementById('font-val').innerText = e.target.value + 'px'; }
+        }
+
+        function exportDataToClipboard() {
+            // Essa função pega os dados DO SEU COMPUTADOR e cria um texto JSON
+            const dataStr = JSON.stringify(appData);
+            const exportArea = document.getElementById('export-area');
+            exportArea.value = dataStr;
+            exportArea.classList.remove('hidden');
+            exportArea.select();
+            document.execCommand('copy');
+            alert("✅ DADOS COPIADOS!\n\nAgora vá no seu arquivo HTML e cole isso na variável 'defaultState'.");
+        }
+
+        function addNewDish() { appData.menu.push({ name: "Novo Prato", img: "", sides: "Arroz, Feijão" }); populateAdminUI(); }
+        function deleteDish(idx) { if(confirm("Excluir?")) { appData.menu.splice(idx, 1); populateAdminUI(); } }
+
+        function saveSystemData() {
+            appData.meta.name = document.getElementById('adm-name').value;
+            appData.meta.insta = document.getElementById('adm-insta').value;
+            appData.meta.password = document.getElementById('adm-pass').value;
+            appData.meta.color = document.getElementById('adm-color').value;
+            appData.meta.bgColor = document.getElementById('adm-bg-color').value;
+            appData.meta.fontSize = document.getElementById('adm-font-size').value;
+            appData.meta.banner = document.getElementById('adm-banner-data').value;
+            appData.menu.forEach((_, i) => {
+                const name = document.getElementById(`d-name-${i}`);
+                if(name) {
+                    appData.menu[i].name = name.value;
+                    appData.menu[i].sides = document.getElementById(`d-sides-${i}`).value;
+                    appData.menu[i].img = document.getElementById(`d-val-${i}`).value;
+                }
+            });
+            try {
+                localStorage.setItem(DB_KEY, JSON.stringify(appData));
+                alert("Salvo no SEU PC! Lembre-se de EXPORTAR se quiser enviar para outros.");
+                location.reload();
+            } catch (e) { alert("Imagem muito grande! Use imagens menores."); }
+        }
+
+        function processHighDefImage(input, viewId, dataId) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = new Image();
+                    img.src = e.target.result;
+                    img.onload = function() {
+                        const canvas = document.createElement('canvas');
+                        const ctx = canvas.getContext('2d');
+                        const MAX_WIDTH = 1280; // Full HD Otimizado
+                        let width = img.width; let height = img.height;
+                        if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
+                        canvas.width = width; canvas.height = height;
+                        ctx.drawImage(img, 0, 0, width, height);
+                        const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+                        document.getElementById(viewId).src = dataUrl; document.getElementById(dataId).value = dataUrl;
+                    }
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function setupListeners() { document.getElementById('client-name').addEventListener('input', validateForm); }
+    </script>
 </body>
 </html>
