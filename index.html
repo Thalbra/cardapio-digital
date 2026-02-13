@@ -113,11 +113,38 @@
                     Trocar</button>
             </div>
 
+            <div class="mb-6 p-4 bg-orange-50 border-2 border-orange-200 rounded-xl">
+                <p class="text-center font-black text-orange-700 uppercase text-sm italic">ATENÇÃO: ESCOLHA O SEU PRATO
+                    PRINCIPAL E DEPOIS OS ACOMPANHAMENTOS E QUANTIDADES DESEJADAS.</p>
+            </div>
+
             <div id="pratos-grid" class="space-y-5"></div>
 
-            <div id="acc-area" class="hidden mt-10 fade-in bg-gray-50 p-5 rounded-2xl border border-gray-100">
-                <h3 class="font-black text-lg mb-4 text-gray-800">● Acompanhamentos</h3>
-                <div id="acc-list" class="grid grid-cols-1 gap-3"></div>
+            <div id="acc-area"
+                class="hidden mt-10 fade-in bg-gray-50 p-6 rounded-2xl border border-gray-100 shadow-inner">
+                <h3 class="font-black text-lg mb-4 text-gray-800 flex items-center gap-2">
+                    <span class="w-2 h-6 bg-[var(--primary)] rounded-full"></span>
+                    Acompanhamentos
+                </h3>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- LADO ESQUERDO: SELEÇÃO -->
+                    <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
+                        <p class="text-[10px] font-bold text-gray-400 uppercase mb-4 tracking-tighter">1. Escolha os
+                            itens</p>
+                        <div id="acc-checklist" class="grid grid-cols-1 gap-2"></div>
+                    </div>
+
+                    <!-- LADO DIREITO: OBSERVAÇÃO -->
+                    <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm relative">
+                        <p class="text-[10px] font-bold text-gray-400 uppercase mb-4 tracking-tighter">2. Defina as
+                            porções</p>
+                        <div id="acc-portions-list" class="space-y-3">
+                            <p id="empty-sides-msg" class="text-xs text-gray-400 italic text-center py-10">Os itens
+                                selecionados aparecerão aqui para ajuste de porção.</p>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -203,6 +230,7 @@
     <script>
         const WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbxTuE6NGz5MXXQMpb38bcD_tMNykKF4SDTjQwWlruxk6kkpXKSm5l8GFhap0IvutAwLJg/exec";
         const DB_KEY = "APP_MENU_V7_FINAL";
+        let currentOrder = { dish: null, sidesData: {} };
 
         // =================================================================
         // ÁREA ONDE VOCÊ COLARÁ OS DADOS DEPOIS
@@ -211,7 +239,6 @@
         // =================================================================
 
         let appData = structuredClone(defaultState);
-        let currentOrder = { dish: null, sides: [] };
 
         // Função de sanitização para prevenir XSS
         function sanitizeHTML(str) {
@@ -275,36 +302,100 @@
 
         function selectDish(index) {
             currentOrder.dish = appData.menu[index];
-            currentOrder.sides = [];
+            currentOrder.sidesData = {};
+
             document.querySelectorAll('[id^="dish-card-"]').forEach(el => el.classList.add('hidden'));
             const selected = document.getElementById(`dish-card-${index}`);
             selected.classList.remove('hidden');
             selected.classList.add('card-selected');
             document.getElementById('btn-reset').classList.remove('hidden');
+
             const accArea = document.getElementById('acc-area');
-            const accList = document.getElementById('acc-list');
+            const accChecklist = document.getElementById('acc-checklist');
+            const accPortions = document.getElementById('acc-portions-list');
+
             accArea.classList.remove('hidden');
+            accPortions.innerHTML = '<p id="empty-sides-msg" class="text-xs text-gray-400 italic text-center py-10">Os itens selecionados aparecerão aqui para ajuste de porção e quantidade.</p>';
+
             const options = (currentOrder.dish.sides || '').split(',').map(s => s.trim()).filter(s => s);
-            accList.innerHTML = options.map(opt => {
+
+            accChecklist.innerHTML = options.map((opt, i) => {
                 const safeOpt = sanitizeHTML(opt);
                 return `
-                <label class="flex items-center p-4 bg-white border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-50 transition-colors">
-                    <input type="checkbox" onchange="toggleSide('${safeOpt}')" class="w-6 h-6 rounded text-[var(--primary)] focus:ring-[var(--primary)]">
-                    <span class="ml-3 font-medium text-gray-700">${safeOpt}</span>
+                <label class="flex items-center p-3 bg-gray-50 rounded-xl cursor-pointer hover:bg-gray-100 transition-all border border-transparent hover:border-gray-200">
+                    <input type="checkbox" onchange="toggleSide('${safeOpt}', this.checked)" 
+                        class="w-5 h-5 rounded text-[var(--primary)] focus:ring-[var(--primary)]">
+                    <span class="ml-3 font-bold text-gray-700 text-xs uppercase">${safeOpt}</span>
                 </label>
-            `}).join('');
+                `;
+            }).join('');
             validateForm();
         }
 
-        function toggleSide(name) {
-            const i = currentOrder.sides.indexOf(name);
-            if (i > -1) currentOrder.sides.splice(i, 1); else currentOrder.sides.push(name);
+        function toggleSide(name, isChecked) {
+            const accPortions = document.getElementById('acc-portions-list');
+            const emptyMsg = document.getElementById('empty-sides-msg');
+
+            if (isChecked) {
+                if (emptyMsg) emptyMsg.remove();
+                currentOrder.sidesData[name] = { selected: true, portion: 'NORMAL', quantity: 1 };
+
+                const itemEl = document.createElement('div');
+                itemEl.id = `portion-item-${name}`;
+                itemEl.className = "p-4 bg-gray-50 rounded-xl border border-gray-100 fade-in space-y-3";
+                itemEl.innerHTML = `
+                    <div class="flex justify-between items-center">
+                        <span class="font-black text-[11px] uppercase text-gray-800">${name}</span>
+                        <div class="flex items-center gap-3 bg-white p-1 rounded-lg border shadow-sm">
+                            <button onclick="updateSideQuantity('${name}', -1)" class="w-6 h-6 flex items-center justify-center font-bold text-red-500">-</button>
+                            <span id="qty-${name}" class="font-black text-xs min-w-[20px] text-center">1</span>
+                            <button onclick="updateSideQuantity('${name}', 1)" class="w-6 h-6 flex items-center justify-center font-bold text-green-600">+</button>
+                        </div>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="updateSidePortion('${name}', 'POUCO')" id="btn-pouco-${name}"
+                            class="flex-1 py-2 border-2 border-orange-500 rounded-lg text-[10px] font-black uppercase transition-all bg-white text-orange-500">Pouco</button>
+                        <button onclick="updateSidePortion('${name}', 'NORMAL')" id="btn-normal-${name}"
+                            class="flex-1 py-2 border-2 border-[var(--primary)] rounded-lg text-[10px] font-black uppercase transition-all bg-[var(--primary)] text-white">Normal</button>
+                    </div>
+                `;
+                accPortions.appendChild(itemEl);
+            } else {
+                delete currentOrder.sidesData[name];
+                const el = document.getElementById(`portion-item-${name}`);
+                if (el) el.remove();
+                if (Object.keys(currentOrder.sidesData).length === 0) {
+                    accPortions.innerHTML = '<p id="empty-sides-msg" class="text-xs text-gray-400 italic text-center py-10">Os itens selecionados aparecerão aqui para ajuste de porção e quantidade.</p>';
+                }
+            }
             validateForm();
+        }
+
+        function updateSideQuantity(name, delta) {
+            const data = currentOrder.sidesData[name];
+            if (!data) return;
+            data.quantity = Math.max(1, (data.quantity || 1) + delta);
+            document.getElementById(`qty-${name}`).innerText = data.quantity;
+            validateForm();
+        }
+
+        function updateSidePortion(name, portion) {
+            currentOrder.sidesData[name].portion = portion;
+            const btnP = document.getElementById(`btn-pouco-${name}`);
+            const btnN = document.getElementById(`btn-normal-${name}`);
+
+            if (portion === 'POUCO') {
+                btnP.className = "flex-1 py-2 border-2 border-orange-500 rounded-lg text-[10px] font-black uppercase bg-orange-500 text-white";
+                btnN.className = "flex-1 py-2 border-2 border-[var(--primary)] rounded-lg text-[10px] font-black uppercase bg-white text-[var(--primary)]";
+            } else {
+                btnP.className = "flex-1 py-2 border-2 border-orange-500 rounded-lg text-[10px] font-black uppercase bg-white text-orange-500";
+                btnN.className = "flex-1 py-2 border-2 border-[var(--primary)] rounded-lg text-[10px] font-black uppercase bg-[var(--primary)] text-white";
+            }
         }
 
         function resetOrder() {
-            currentOrder = { dish: null, sides: [] };
-            document.querySelectorAll('[id^="dish-card-"]').forEach(el => { el.classList.remove('hidden'); el.classList.remove('card-selected'); });
+            currentOrder = { dish: null, sidesData: {} };
+            document.querySelectorAll('[id^="dish-card-"]').forEach(el => { el.classList.remove('hidden', 'card-selected'); });
             document.getElementById('btn-reset').classList.add('hidden');
             document.getElementById('acc-area').classList.add('hidden');
             validateForm();
@@ -313,7 +404,9 @@
         function validateForm() {
             const name = document.getElementById('client-name').value.trim();
             const btn = document.getElementById('btn-send');
-            if (name.length > 2 && currentOrder.dish && currentOrder.sides.length > 0) {
+            const hasSide = Object.values(currentOrder.sidesData || {}).some(s => s.selected);
+
+            if (name.length > 2 && currentOrder.dish && hasSide) {
                 btn.disabled = false; btn.className = "w-full py-5 rounded-2xl font-black text-lg uppercase tracking-widest shadow-2xl transition-all btn-main cursor-pointer";
             } else {
                 btn.disabled = true; btn.className = "w-full py-5 rounded-2xl font-black text-lg uppercase tracking-widest shadow-2xl transition-all opacity-40 bg-gray-500 text-white cursor-not-allowed";
@@ -322,16 +415,29 @@
 
         async function submitOrder() {
             const btn = document.getElementById('btn-send');
-            btn.innerHTML = '<span class="loader"></span> Enviando...';
+            if (btn.disabled) return;
+
             btn.disabled = true;
+            btn.innerHTML = '<span class="loader"></span> ENVIANDO...';
+
             const now = new Date();
+            const sidesText = Object.entries(currentOrder.sidesData)
+                .filter(([_, data]) => data.selected)
+                .map(([name, data]) => {
+                    const qty = data.quantity > 1 ? `${data.quantity}x ` : '';
+                    const port = data.portion === 'POUCO' ? ' (POUCO)' : '';
+                    return `${qty}${name}${port}`;
+                })
+                .join(', ')
+                .toUpperCase();
+
             const payload = {
                 dataHora: now.toLocaleDateString('pt-BR') + ' ' + now.toLocaleTimeString('pt-BR'),
                 data: now.toLocaleDateString('pt-BR'),
                 hora: now.toLocaleTimeString('pt-BR'),
                 nome: document.getElementById('client-name').value.toUpperCase(),
                 prato: currentOrder.dish.name.toUpperCase(),
-                acompanhamentos: currentOrder.sides.join(', ').toUpperCase()
+                acompanhamentos: sidesText
             };
             try {
                 await fetch(WEBHOOK_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
