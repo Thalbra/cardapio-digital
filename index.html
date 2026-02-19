@@ -443,8 +443,9 @@
                 hora: now.toLocaleTimeString('pt-BR'),
                 nome: document.getElementById('client-name').value.toUpperCase(),
                 prato: currentOrder.dish.name.toUpperCase(),
-                acompanhamentos: sidesText
+                acompanhamento: sidesText
             };
+
             try {
                 // Tenta enviar com no-cors (padrão para GAS)
                 await fetch(WEBHOOK_URL, {
