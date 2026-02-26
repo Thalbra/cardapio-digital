@@ -171,8 +171,8 @@
                     <div class="bg-yellow-50 border-2 border-yellow-400 p-6 rounded-xl">
                         <h3 class="text-lg font-black text-yellow-800 mb-2">⚠️ PUBLICAR SITE</h3>
                         <p class="text-xs text-yellow-800 mb-4 font-bold">Para que o cardápio funcione em outros
-                            celulares, clique no botão abaixo, copie o código e substitua a variável 'defaultState' no
-                            HTML.</p>
+                            celulares, clique no botão abaixo, copie o código e atualize o arquivo dados.json no
+                            GitHub.</p>
                         <button onclick="exportDataToClipboard()"
                             class="bg-yellow-500 text-white font-black py-3 px-6 rounded-xl w-full hover:bg-yellow-600">
                             COPIAR CÓDIGO DE DADOS (JSON)
@@ -230,6 +230,7 @@
     <script>
         const WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbwKVizmlOQJiW-L82wP9ZhFnmYXiaDjmwOW0lz_LXMhLSXNFbAUlmFrulthDVe3_JdL-A/exec";
         const DB_KEY = "APP_MENU_V7_FINAL";
+        const DATA_JSON_URL = "./dados.json";
         let currentOrder = { dish: null, sidesData: {} };
 
         // =================================================================
@@ -252,20 +253,39 @@
             return str.replace(/'/g, "\\'").replace(/"/g, '&quot;');
         }
 
-        window.onload = () => { loadSystem(); setupListeners(); };
+        window.onload = async () => { await loadSystem(); setupListeners(); };
 
-        function loadSystem() {
-            // Tenta carregar do LocalStorage (SEU PC), se não tiver, usa o defaultState (VISITANTE)
-            const stored = localStorage.getItem(DB_KEY);
-            if (stored) {
-                try {
-                    const parsed = JSON.parse(stored);
-                    appData = { ...defaultState, ...parsed, meta: { ...defaultState.meta, ...parsed.meta } };
-                } catch (e) { console.error(e); }
-            } else {
-                // Se não tem dados locais, usa o defaultState (Isso acontece nos outros celulares)
-                appData = structuredClone(defaultState);
+        async function loadSystem() {
+            // Sempre tenta carregar os dados publicados (dados.json), sem usar cache.
+            try {
+                const cacheBuster = Date.now();
+                const response = await fetch(`${DATA_JSON_URL}?v=${cacheBuster}`, { cache: 'no-store' });
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+                const publishedData = await response.json();
+                appData = {
+                    ...defaultState,
+                    ...publishedData,
+                    meta: { ...defaultState.meta, ...(publishedData.meta || {}) },
+                    menu: Array.isArray(publishedData.menu) ? publishedData.menu : defaultState.menu
+                };
+            } catch (err) {
+                console.warn('Falha ao carregar dados publicados; usando local/default.', err);
+
+                const stored = localStorage.getItem(DB_KEY);
+                if (stored) {
+                    try {
+                        const parsed = JSON.parse(stored);
+                        appData = { ...defaultState, ...parsed, meta: { ...defaultState.meta, ...parsed.meta } };
+                    } catch (e) {
+                        console.error(e);
+                        appData = structuredClone(defaultState);
+                    }
+                } else {
+                    appData = structuredClone(defaultState);
+                }
             }
+
             applyVisuals();
             renderFrontend();
         }
@@ -497,7 +517,7 @@
         }
 
         async function exportDataToClipboard() {
-            // Essa função pega os dados DO SEU COMPUTADOR e cria um texto JSON
+            // Essa função pega os dados locais e gera o JSON para atualizar o arquivo dados.json publicado
             const dataStr = JSON.stringify(appData);
             const exportArea = document.getElementById('export-area');
             exportArea.value = dataStr;
@@ -505,12 +525,12 @@
 
             try {
                 await navigator.clipboard.writeText(dataStr);
-                alert("✅ DADOS COPIADOS!\n\nAgora vá no seu arquivo HTML e cole isso na variável 'defaultState'.");
+                alert("✅ DADOS COPIADOS!\n\nAgora atualize o arquivo dados.json no GitHub com esse conteúdo e faça commit/push.");
             } catch (err) {
                 // Fallback para navegadores antigos
                 exportArea.select();
                 document.execCommand('copy');
-                alert("✅ DADOS COPIADOS!\n\nAgora vá no seu arquivo HTML e cole isso na variável 'defaultState'.");
+                alert("✅ DADOS COPIADOS!\n\nAgora atualize o arquivo dados.json no GitHub com esse conteúdo e faça commit/push.");
             }
         }
 
@@ -567,6 +587,12 @@
 </body>
 
 </html>
+
+
+
+
+
+
 
 
 
