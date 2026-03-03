@@ -115,7 +115,7 @@
 
             <div class="mb-6 p-4 bg-orange-50 border-2 border-orange-200 rounded-xl">
                 <p class="text-center font-black text-orange-700 uppercase text-sm italic">ATENÇÃO: ESCOLHA O SEU PRATO
-                    PRINCIPAL E DEPOIS OS ACOMPANHAMENTOS E QUANTIDADES DESEJADAS.</p>
+                    PRINCIPAL E DEPOIS MARQUE OS ACOMPANHAMENTOS E A OBSERVAÇÃO (POUCO OU NORMAL).</p>
             </div>
 
             <div id="pratos-grid" class="space-y-5"></div>
@@ -137,11 +137,10 @@
 
                     <!-- LADO DIREITO: OBSERVAÇÃO -->
                     <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm relative">
-                        <p class="text-[10px] font-bold text-gray-400 uppercase mb-4 tracking-tighter">2. Defina as
-                            porções</p>
+                        <p class="text-[10px] font-bold text-gray-400 uppercase mb-4 tracking-tighter">2. Defina a observação</p>
                         <div id="acc-portions-list" class="space-y-3">
                             <p id="empty-sides-msg" class="text-xs text-gray-400 italic text-center py-10">Os itens
-                                selecionados aparecerão aqui para ajuste de porção.</p>
+                                selecionados aparecerão aqui para ajuste de observação (pouco ou normal).</p>
                         </div>
                     </div>
                 </div>
@@ -228,7 +227,7 @@
     <div onclick="adminAuth()" class="fixed top-0 right-0 w-20 h-20 z-[50]"></div>
 
     <script>
-        const WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbwKVizmlOQJiW-L82wP9ZhFnmYXiaDjmwOW0lz_LXMhLSXNFbAUlmFrulthDVe3_JdL-A/exec";
+        const WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbwtt6mdGX1hJdgH99Z1W0uIEpyH1QYc6FssBnily-_XIj68fsoiHz_5WZz8W8iEy8jmTg/exec";
         const DB_KEY = "APP_MENU_V7_FINAL";
         const DATA_JSON_URL = "./dados.json";
         let currentOrder = { dish: null, sidesData: {} };
@@ -340,7 +339,7 @@
             const accPortions = document.getElementById('acc-portions-list');
 
             accArea.classList.remove('hidden');
-            accPortions.innerHTML = '<p id="empty-sides-msg" class="text-xs text-gray-400 italic text-center py-10">Os itens selecionados aparecerão aqui para ajuste de porção e quantidade.</p>';
+            accPortions.innerHTML = '<p id="empty-sides-msg" class="text-xs text-gray-400 italic text-center py-10">Os itens selecionados aparecerão aqui para ajuste de observação (pouco ou normal).</p>';
 
             const options = (currentOrder.dish.sides || '').split(',').map(s => s.trim()).filter(s => s);
 
@@ -364,19 +363,15 @@
 
             if (isChecked) {
                 if (emptyMsg) emptyMsg.remove();
-                currentOrder.sidesData[name] = { selected: true, portion: 'NORMAL', quantity: 1 };
+                currentOrder.sidesData[name] = { selected: true, portion: 'NORMAL' };
 
                 const itemEl = document.createElement('div');
                 itemEl.id = `portion-item-${name}`;
                 itemEl.className = "p-4 bg-gray-50 rounded-xl border border-gray-100 fade-in space-y-3";
                 itemEl.innerHTML = `
-                    <div class="flex justify-between items-center">
+                    <div class="flex items-center justify-between gap-3">
                         <span class="font-black text-[11px] uppercase text-gray-800">${name}</span>
-                        <div class="flex items-center gap-3 bg-white p-1 rounded-lg border shadow-sm">
-                            <button onclick="updateSideQuantity('${name}', -1)" class="w-6 h-6 flex items-center justify-center font-bold text-red-500">-</button>
-                            <span id="qty-${name}" class="font-black text-xs min-w-[20px] text-center">1</span>
-                            <button onclick="updateSideQuantity('${name}', 1)" class="w-6 h-6 flex items-center justify-center font-bold text-green-600">+</button>
-                        </div>
+                        <span class="text-[10px] font-bold uppercase text-gray-500">Observação</span>
                     </div>
                     <div class="flex gap-2">
                         <button onclick="updateSidePortion('${name}', 'POUCO')" id="btn-pouco-${name}"
@@ -391,17 +386,9 @@
                 const el = document.getElementById(`portion-item-${name}`);
                 if (el) el.remove();
                 if (Object.keys(currentOrder.sidesData).length === 0) {
-                    accPortions.innerHTML = '<p id="empty-sides-msg" class="text-xs text-gray-400 italic text-center py-10">Os itens selecionados aparecerão aqui para ajuste de porção e quantidade.</p>';
+                    accPortions.innerHTML = '<p id="empty-sides-msg" class="text-xs text-gray-400 italic text-center py-10">Os itens selecionados aparecerão aqui para ajuste de observação (pouco ou normal).</p>';
                 }
             }
-            validateForm();
-        }
-
-        function updateSideQuantity(name, delta) {
-            const data = currentOrder.sidesData[name];
-            if (!data) return;
-            data.quantity = Math.max(1, (data.quantity || 1) + delta);
-            document.getElementById(`qty-${name}`).innerText = data.quantity;
             validateForm();
         }
 
@@ -447,12 +434,17 @@
             btn.innerHTML = '<span class="loader"></span> ENVIANDO...';
 
             const now = new Date();
-            const sidesText = Object.entries(currentOrder.sidesData)
-                .filter(([_, data]) => data.selected)
-                .map(([name, data]) => {
-                    const qty = data.quantity > 1 ? `${data.quantity}x ` : '';
-                    const port = data.portion === 'POUCO' ? ' (POUCO)' : '';
-                    return `${qty}${name}${port}`;
+            const formSidesOrder = (currentOrder.dish?.sides || '')
+                .split(',')
+                .map(side => side.trim())
+                .filter(Boolean);
+
+            const sidesText = formSidesOrder
+                .filter(name => currentOrder.sidesData[name]?.selected)
+                .map(name => {
+                    const data = currentOrder.sidesData[name];
+                    const port = data.portion === 'POUCO' ? ' (POUCO)' : ' (NORMAL)';
+                    return `${name}${port}`;
                 })
                 .join(', ')
                 .toUpperCase();
@@ -587,6 +579,10 @@
 </body>
 
 </html>
+
+
+
+
 
 
 
